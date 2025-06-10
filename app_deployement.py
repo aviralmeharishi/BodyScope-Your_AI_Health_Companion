@@ -4,19 +4,18 @@ import pickle
 import google.generativeai as genai
 import openai
 
-# --- Load Model ---
+# Load the model
 with open("final_model.pkl", "rb") as f:
     model = pickle.load(f)
 
-# --- API Keys ---
+# API configuration
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# --- Streamlit Setup ---
 st.set_page_config(page_title="BodyScope", layout="centered")
 st.title("🩺 BodyScope: Your AI Health Companion")
 
-# --- Input Form ---
+# Input Form
 def get_user_input():
     st.header("🙋 Enter Your Health Profile")
 
@@ -30,22 +29,20 @@ def get_user_input():
     with col1:
         feet = st.number_input("Feet", min_value=2, max_value=8, value=5)
     with col2:
-        inches = st.number_input("Inches", min_value=0, max_value=11, value=7)
+        inches = st.number_input("Inches", min_value=0, max_value=11, value=6)
 
     height_m = round(((feet * 12) + inches) * 0.0254, 2)
 
     weight = st.number_input("Weight (in kg)", 20, 200, 70)
     bmi = round(weight / (height_m ** 2), 1)
-    st.markdown(f"**📊 Your BMI: `{bmi}`**")
+    st.markdown(f"**📊 Your BMI: {bmi}**")
 
     fam_history = st.selectbox("Family history of overweight?", ['No', 'Yes']) == 'Yes'
     fried = st.selectbox("Eat fried food often?", ['No', 'Yes']) == 'Yes'
     veg = st.slider("Veggies per meal (1-3)", 1, 3, 2)
     meals = st.slider("Main meals/day", 1, 4, 3)
-
     snacking = st.selectbox("Snacking frequency", ['Never', 'Sometimes', 'Frequently', 'Always'])
     snack_val = ['Never', 'Sometimes', 'Frequently', 'Always'].index(snacking)
-
     smoke = st.selectbox("Do you smoke?", ['No', 'Yes']) == 'Yes'
 
     water = st.selectbox("Water intake", ['Low (<1L)', 'Moderate (1-2L)', 'High (>2L)'])
@@ -84,55 +81,39 @@ def get_user_input():
 
     return pd.DataFrame([data]), bmi, data
 
+# Get input
 input_df, bmi, user_data = get_user_input()
 
-# --- Prediction ---
+# Predict button
 if st.button("🔍 Predict My Obesity Risk"):
     prediction = model.predict(input_df)[0]
-    
-    # Optional class mapping (update this based on your model)
-    class_map = {
-        'Insufficient_Weight': 'Underweight',
-        'Normal_Weight': 'Healthy',
-        'Overweight_Level_I': 'Overweight',
-        'Overweight_Level_II': 'Obese',
-        'Obesity_Type_I': 'Obese',
-        'Obesity_Type_II': 'Severely Obese',
-        'Obesity_Type_III': 'Extremely Obese'
+
+    label_map = {
+        0: "Underweight",
+        1: "Healthy",
+        2: "Overweight",
+        3: "Obese"
     }
-    readable = class_map.get(prediction, prediction)
 
-    st.success(f"🧬 **Predicted Obesity Class:** `{readable}`")
+    prediction_label = label_map.get(prediction, "Unknown")
+    st.success(f"🧬 **Obesity Category**: {prediction_label}")
 
-# --- Suggestions Section ---
-st.subheader("🧠 Personalized Health Advice")
-
+# Horizontal layout for AI buttons
 col1, col2 = st.columns(2)
 
 with col1:
     if st.button("🧚‍♀️ Ask Dr. Gemi"):
         gemi_prompt = f"""
 Hello! नमस्ते! मैं Dr. Gemi हूँ, आपकी AI हेल्थ साथी ❤️  
-Please provide 10 sweet and heartwarming health suggestions in English & Hindi for a person with the following profile:
+Please provide 10 sweet and heartwarming health suggestions in English & Hindi for the following profile:
 
 {user_data}
 
-BMI is approximately {bmi}. Focus on motivation, encouragement, and practical improvements.
+Their BMI is {bmi}. Focus on motivation, warmth, and practical lifestyle suggestions.
 """
-
-        try:
-            model_gemi = genai.GenerativeModel("gemini-pro")
-            response = model_gemi.generate_content(gemi_prompt, temperature=0.9)
-
-            if response and response.candidates:
-                gemi_text = response.candidates[0].content.parts[0].text
-            else:
-                gemi_text = "❌ Gemini could not generate a response."
-
-            st.markdown(gemi_text, unsafe_allow_html=True)
-
-        except Exception as e:
-            st.error("Gemini Error: " + str(e))
+        gemini_model = genai.GenerativeModel("gemini-pro")
+        gemi_response = gemini_model.generate_content(gemi_prompt).text
+        st.markdown(gemi_response, unsafe_allow_html=True)
 
 with col2:
     if st.button("🧑‍⚕️ Ask Dr. Opie"):
@@ -140,23 +121,19 @@ with col2:
 User profile:  
 {user_data}
 
-BMI ~ {bmi}.  
-You're Dr. Opie: strict, disciplined AI doctor. Give 10 direct, practical, and actionable health tips in **English & Hindi** to improve their lifestyle and BMI.
+BMI: {bmi}
+
+You're Dr. Opie, a disciplined, no-nonsense AI doctor. Give 10 strict, practical health tips in **English & Hindi** to help them improve lifestyle and BMI.
 """
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are Dr. Opie, a strict and disciplined AI health expert."},
+                {"role": "user", "content": opie_prompt}
+            ],
+            temperature=0.6,
+            max_tokens=600
+        )
+        st.markdown(response.choices[0].message.content, unsafe_allow_html=True)
 
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are Dr. Opie, a no-nonsense, strict health advisor."},
-                    {"role": "user", "content": opie_prompt}
-                ],
-                temperature=0.6,
-                max_tokens=600
-            )
-            st.markdown(response.choices[0].message.content, unsafe_allow_html=True)
-        except Exception as e:
-            st.error("OpenAI Error: " + str(e))
-
-# --- Disclaimer ---
-st.info("⚠️ These health tips are AI-generated for educational use and are not a substitute for professional medical advice.")
+st.info("⚠️ These AI suggestions are educational and not a replacement for professional medical advice.")

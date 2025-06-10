@@ -23,7 +23,7 @@ def get_user_input():
     gender = st.radio("Gender", ['Female', 'Male', 'Others'])
     gender = {"Female": 0, "Male": 2, "Others": 1}[gender]
 
-    age = st.slider("Age", 10, 100, 25)
+    age = st.slider("How Old are You ?", 10, 100, 25)
     st.markdown("#### Height")
     col1, col2 = st.columns(2)
     with col1:
@@ -35,7 +35,7 @@ def get_user_input():
     height_m = round(((feet * 12) + inches) * 0.0254, 2)
 
     weight = st.number_input("Weight (in kg)", 20, 200, 70)
-    bmi = round(weight / (height ** 2), 1)
+    bmi = round(weight / (height_m ** 2), 1)
     st.markdown(f"**📊 Your BMI: {bmi}**")
 
     fam_history = st.selectbox("Family history of overweight?", ['No', 'Yes']) == 'Yes'

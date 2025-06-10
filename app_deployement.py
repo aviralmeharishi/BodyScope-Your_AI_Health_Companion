@@ -111,7 +111,7 @@ Please provide 10 sweet and heartwarming health suggestions in English & Hindi f
 
 Their BMI is {bmi}. Focus on motivation, warmth, and practical lifestyle suggestions.
 """
-        gemini_model = genai.GenerativeModel("gemini-pro")
+        gemini_model = genai.GenerativeModel("gemini-2.0-flash")
         gemi_response = gemini_model.generate_content(gemi_prompt).text
         st.markdown(gemi_response, unsafe_allow_html=True)
 

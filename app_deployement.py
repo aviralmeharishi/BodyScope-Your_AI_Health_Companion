@@ -64,7 +64,7 @@ def get_user_input():
     data = {
         'Gender': gender,
         'Age': age,
-        'Height': height,
+        'Height': height_m,
         'Weight': weight,
         'family_history_with_overweight': int(fam_history),
         'Fried_Food_Consump': int(fried),

@@ -12,14 +12,6 @@ with open("final_model.pkl", "rb") as f:
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# --- Prediction Class Mapping ---
-class_map = {
-    0: 'Underweight',
-    1: 'Normal weight',
-    2: 'Overweight',
-    3: 'Obese'
-}
-
 # --- Streamlit Setup ---
 st.set_page_config(page_title="BodyScope", layout="centered")
 st.title("🩺 BodyScope: Your AI Health Companion")
@@ -31,27 +23,29 @@ def get_user_input():
     gender = st.radio("Gender", ['Female', 'Male', 'Others'])
     gender = {"Female": 0, "Male": 2, "Others": 1}[gender]
 
-    age = st.slider("How Old are You ?", 10, 100, 25)
+    age = st.slider("How Old are You?", 10, 100, 25)
+
     st.markdown("#### Height")
     col1, col2 = st.columns(2)
     with col1:
         feet = st.number_input("Feet", min_value=2, max_value=8, value=5)
     with col2:
         inches = st.number_input("Inches", min_value=0, max_value=11, value=7)
-    
-    # Convert to meters
+
     height_m = round(((feet * 12) + inches) * 0.0254, 2)
 
     weight = st.number_input("Weight (in kg)", 20, 200, 70)
     bmi = round(weight / (height_m ** 2), 1)
-    st.markdown(f"**📊 Your BMI: {bmi}**")
+    st.markdown(f"**📊 Your BMI: `{bmi}`**")
 
     fam_history = st.selectbox("Family history of overweight?", ['No', 'Yes']) == 'Yes'
     fried = st.selectbox("Eat fried food often?", ['No', 'Yes']) == 'Yes'
     veg = st.slider("Veggies per meal (1-3)", 1, 3, 2)
     meals = st.slider("Main meals/day", 1, 4, 3)
+
     snacking = st.selectbox("Snacking frequency", ['Never', 'Sometimes', 'Frequently', 'Always'])
     snack_val = ['Never', 'Sometimes', 'Frequently', 'Always'].index(snacking)
+
     smoke = st.selectbox("Do you smoke?", ['No', 'Yes']) == 'Yes'
 
     water = st.selectbox("Water intake", ['Low (<1L)', 'Moderate (1-2L)', 'High (>2L)'])
@@ -90,16 +84,29 @@ def get_user_input():
 
     return pd.DataFrame([data]), bmi, data
 
-# --- Get Inputs ---
 input_df, bmi, user_data = get_user_input()
 
 # --- Prediction ---
 if st.button("🔍 Predict My Obesity Risk"):
     prediction = model.predict(input_df)[0]
-    label = class_map.get(prediction, "Unknown")
-    st.success(f"🧬 **Obesity Class**: {label}")
+    
+    # Optional class mapping (update this based on your model)
+    class_map = {
+        'Insufficient_Weight': 'Underweight',
+        'Normal_Weight': 'Healthy',
+        'Overweight_Level_I': 'Overweight',
+        'Overweight_Level_II': 'Obese',
+        'Obesity_Type_I': 'Obese',
+        'Obesity_Type_II': 'Severely Obese',
+        'Obesity_Type_III': 'Extremely Obese'
+    }
+    readable = class_map.get(prediction, prediction)
 
-# --- Horizontal Buttons for Gemini & OpenAI ---
+    st.success(f"🧬 **Predicted Obesity Class:** `{readable}`")
+
+# --- Suggestions Section ---
+st.subheader("🧠 Personalized Health Advice")
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -112,10 +119,20 @@ Please provide 10 sweet and heartwarming health suggestions in English & Hindi f
 
 BMI is approximately {bmi}. Focus on motivation, encouragement, and practical improvements.
 """
-        response = genai.GenerativeModel("gemini-pro").generate_content(
-            gemi_prompt, temperature=0.9
-        ).text
-        st.markdown(response, unsafe_allow_html=True)
+
+        try:
+            model_gemi = genai.GenerativeModel("gemini-pro")
+            response = model_gemi.generate_content(gemi_prompt, temperature=0.9)
+
+            if response and response.candidates:
+                gemi_text = response.candidates[0].content.parts[0].text
+            else:
+                gemi_text = "❌ Gemini could not generate a response."
+
+            st.markdown(gemi_text, unsafe_allow_html=True)
+
+        except Exception as e:
+            st.error("Gemini Error: " + str(e))
 
 with col2:
     if st.button("🧑‍⚕️ Ask Dr. Opie"):
@@ -126,16 +143,20 @@ User profile:
 BMI ~ {bmi}.  
 You're Dr. Opie: strict, disciplined AI doctor. Give 10 direct, practical, and actionable health tips in **English & Hindi** to improve their lifestyle and BMI.
 """
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are Dr. Opie, a no-nonsense, strict health advisor."},
-                {"role": "user", "content": opie_prompt}
-            ],
-            temperature=0.6,
-            max_tokens=600
-        )
-        st.markdown(response.choices[0].message.content, unsafe_allow_html=True)
 
-# --- Footer ---
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are Dr. Opie, a no-nonsense, strict health advisor."},
+                    {"role": "user", "content": opie_prompt}
+                ],
+                temperature=0.6,
+                max_tokens=600
+            )
+            st.markdown(response.choices[0].message.content, unsafe_allow_html=True)
+        except Exception as e:
+            st.error("OpenAI Error: " + str(e))
+
+# --- Disclaimer ---
 st.info("⚠️ These health tips are AI-generated for educational use and are not a substitute for professional medical advice.")

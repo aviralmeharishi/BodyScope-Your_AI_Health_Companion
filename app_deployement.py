@@ -12,6 +12,14 @@ with open("final_model.pkl", "rb") as f:
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+# --- Prediction Class Mapping ---
+class_map = {
+    0: 'Underweight',
+    1: 'Normal weight',
+    2: 'Overweight',
+    3: 'Obese'
+}
+
 # --- Streamlit Setup ---
 st.set_page_config(page_title="BodyScope", layout="centered")
 st.title("🩺 BodyScope: Your AI Health Companion")
@@ -82,16 +90,21 @@ def get_user_input():
 
     return pd.DataFrame([data]), bmi, data
 
+# --- Get Inputs ---
 input_df, bmi, user_data = get_user_input()
 
 # --- Prediction ---
 if st.button("🔍 Predict My Obesity Risk"):
     prediction = model.predict(input_df)[0]
-    st.success(f"🧬 **Obesity Class**: {prediction}")
+    label = class_map.get(prediction, "Unknown")
+    st.success(f"🧬 **Obesity Class**: {label}")
 
-# --- Gemi Prompt ---
-if st.button("🧚‍♀️ Ask Dr. Gemi"):
-    gemi_prompt = f"""
+# --- Horizontal Buttons for Gemini & OpenAI ---
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🧚‍♀️ Ask Dr. Gemi"):
+        gemi_prompt = f"""
 Hello! नमस्ते! मैं Dr. Gemi हूँ, आपकी AI हेल्थ साथी ❤️  
 Please provide 10 sweet and heartwarming health suggestions in English & Hindi for a person with the following profile:
 
@@ -99,26 +112,30 @@ Please provide 10 sweet and heartwarming health suggestions in English & Hindi f
 
 BMI is approximately {bmi}. Focus on motivation, encouragement, and practical improvements.
 """
-    response = genai.GenerativeModel("gemini-pro").generate_content(gemi_prompt, temperature=0.9).text
-    st.markdown(response, unsafe_allow_html=True)
+        response = genai.GenerativeModel("gemini-pro").generate_content(
+            gemi_prompt, temperature=0.9
+        ).text
+        st.markdown(response, unsafe_allow_html=True)
 
-# --- Opie Prompt ---
-if st.button("🧑‍⚕️ Ask Dr. Opie"):
-    opie_prompt = f"""
+with col2:
+    if st.button("🧑‍⚕️ Ask Dr. Opie"):
+        opie_prompt = f"""
 User profile:  
 {user_data}
 
 BMI ~ {bmi}.  
 You're Dr. Opie: strict, disciplined AI doctor. Give 10 direct, practical, and actionable health tips in **English & Hindi** to improve their lifestyle and BMI.
 """
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "system", "content": "You are Dr. Opie, a no-nonsense, strict health advisor."},
-                  {"role": "user", "content": opie_prompt}],
-        temperature=0.6, max_tokens=600
-    )['choices'][0]['message']['content']
-    st.markdown(response, unsafe_allow_html=True)
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are Dr. Opie, a no-nonsense, strict health advisor."},
+                {"role": "user", "content": opie_prompt}
+            ],
+            temperature=0.6,
+            max_tokens=600
+        )
+        st.markdown(response.choices[0].message.content, unsafe_allow_html=True)
 
-
+# --- Footer ---
 st.info("⚠️ These health tips are AI-generated for educational use and are not a substitute for professional medical advice.")
-

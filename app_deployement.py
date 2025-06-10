@@ -25,14 +25,14 @@ def get_user_input():
 
     age = st.slider("Age", 10, 100, 25)
     st.markdown("#### Height")
-col1, col2 = st.columns(2)
-with col1:
-    feet = st.number_input("Feet", min_value=2, max_value=8, value=5)
-with col2:
-    inches = st.number_input("Inches", min_value=0, max_value=11, value=7)
-
-# Convert to meters
-height_m = round(((feet * 12) + inches) * 0.0254, 2)
+    col1, col2 = st.columns(2)
+    with col1:
+        feet = st.number_input("Feet", min_value=2, max_value=8, value=5)
+    with col2:
+        inches = st.number_input("Inches", min_value=0, max_value=11, value=7)
+    
+    # Convert to meters
+    height_m = round(((feet * 12) + inches) * 0.0254, 2)
 
     weight = st.number_input("Weight (in kg)", 20, 200, 70)
     bmi = round(weight / (height ** 2), 1)

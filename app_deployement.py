@@ -108,4 +108,5 @@ Please give 10 detailed specific, actionable suggestions in English & Hindi, ref
         st.altair_chart(chart)
 
     # --- Health Disclaimer ---
-    st.info("⚠️ ये स्वास्थ्य सुझाव केवल जानकारी के लिए हैं और किसी चिकित्सक का वैकल्पिक नहीं हैं।\nThese health insights are AI-generated and not a substitute for professional medical advice.", icon="⚠️")
+    
+    st.info("⚠️ These suggestions are for informational purposes only and are not a substitute for professional medical advice.\n⚠️ ये स्वास्थ्य सुझाव केवल जानकारी के लिए हैं और किसी चिकित्सक का विकल्प नहीं हैं।")

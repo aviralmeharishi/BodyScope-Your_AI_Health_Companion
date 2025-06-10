@@ -17,13 +17,6 @@ st.set_page_config(page_title="BodyScope", page_icon="🩺", layout="centered")
 st.title("🩺 BodyScope: Dual-AI Health Companion")
 st.markdown("Answer a few personal and lifestyle questions — get tips from **Dr. Gemi** and **Dr. Opie** in both English & Hindi.")
 
-# --- Data Logging ---
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-def log_input(data):
-    st.session_state.history.append(data)
-    pd.DataFrame(st.session_state.history).to_csv("user_data_log.csv", index=False)
 
 # --- User Input Form ---
 def get_user_input():

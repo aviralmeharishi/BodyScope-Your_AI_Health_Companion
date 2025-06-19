@@ -13,3 +13,7 @@ def insert_to_sql(df: pd.DataFrame):
 def load_model(path: str):
     with open(path, "rb") as f:
         return pickle.load(f)
+
+def convert_height_to_meters(feet: int, inches: int) -> float:
+    return round(((feet * 12) + inches) * 0.0254, 2)
+

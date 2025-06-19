@@ -47,7 +47,7 @@ family_history = st.selectbox("Family history with overweight?", ["yes", "no"])
 submitted = st.button("💬 Ask Dr. Gemi for Advice")
 
 if submitted:
-    # Raw user inputs
+    # 1. Raw user input for Gemini and SQL
     raw_data = {
         'Gender': gender,
         'Age': age,
@@ -69,11 +69,11 @@ if submitted:
         'family_history_with_overweight': family_history
     }
 
-    # Encoded for model (manual mapping based on training)
+    # 2. Encoded data for prediction (matches model training)
     encoded = {
         'Gender': 1 if gender == 'Male' else 0,
         'Age': age,
-        'Height': raw_data['Height'],
+        'Height': convert_height_to_meters(height_ft, height_in),
         'Weight': weight,
         'SMOKE': 1 if smoke == 'yes' else 0,
         'alcohol_consump': {'no': 0, 'Sometimes': 1, 'Frequently': 2, 'Always': 3}[alcohol],
@@ -92,21 +92,22 @@ if submitted:
     ordered_cols = list(encoded.keys())
     input_df = pd.DataFrame([encoded])[ordered_cols]
 
-    # Model Prediction
+    # 3. Model Prediction
     prediction = model.predict(input_df)[0]
 
-    # BMI Evaluation
-    bmi = calculate_bmi(weight, raw_data['Height'])
+    # 4. BMI Logic
+    bmi = calculate_bmi(weight, encoded["Height"])
     bmi_category = get_bmi_category(bmi)
     bmi_color = get_bmi_color(bmi_category)
     bmi_msg = get_bmi_message(bmi, bmi_category)
     bmi_color(bmi_msg)
+
     st.markdown(f"### 🧪 Obesity Risk Prediction: `{prediction}`")
 
-    # Save raw user input to SQL
-    insert_to_sql(pd.DataFrame([raw_data]).drop(columns=['Height_ft', 'Height_in']))
+    # 5. SQL Save
+    insert_to_sql(pd.DataFrame([raw_data]).drop(columns=["Height_ft", "Height_in"]))
 
-    # Gemini Prompt (based on raw values)
+    # 6. Gemini Advice
     with st.spinner("Generating personalized advice from Dr. Gemi..."):
         prompt = generate_prompt(raw_data)
         response = genai.GenerativeModel("gemini-pro").generate_content(

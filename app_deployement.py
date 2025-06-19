@@ -75,7 +75,15 @@ if submitted:
     bmi_msg = get_bmi_message(bmi, bmi_category)
 
     bmi_color(bmi_msg)
-    prediction = model.predict(input_df.drop(columns=['Height_ft', 'Height_in']))[0]
+    ordered_cols = [
+        'Gender', 'Age', 'Height', 'Weight',
+        'SMOKE', 'alcohol_consump', 'Fried_Food_Consump',
+        'Freq_of_Vegie_Consump', 'no_of_meals', 'snacking_freq',
+        'water_consumption', 'calorie_monitoring', 'physical_activity',
+        'time_spend_on_tech', 'MTRANS', 'family_history_with_overweight'
+    ]
+    model_input = input_df[ordered_cols]
+    prediction = model.predict(model_input)[0]
     st.markdown(f"### 🧪 Obesity Risk Prediction: `{prediction}`")
 
     insert_to_sql(input_df.drop(columns=['Height_ft', 'Height_in']))
@@ -90,7 +98,6 @@ if submitted:
     with st.expander("🗣️ Dr. Gemi's Advice - Multilingual"):
         for part in suggestions:
             st.write(part)
-
 
     st.info("Disclaimer: This is an AI-powered tool. Please consult a certified medical professional before making any medical decisions.")
     st.markdown("---")

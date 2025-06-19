@@ -47,6 +47,7 @@ family_history = st.selectbox("Family history with overweight?", ["yes", "no"])
 submitted = st.button("💬 Ask Dr. Gemi for Advice")
 
 if submitted:
+    # Define raw data
     data = {
         'Gender': gender,
         'Age': age,
@@ -68,13 +69,7 @@ if submitted:
         'family_history_with_overweight': family_history
     }
 
-    input_df = pd.DataFrame([data])
-    bmi = calculate_bmi(weight, data['Height'])
-    bmi_category = get_bmi_category(bmi)
-    bmi_color = get_bmi_color(bmi_category)
-    bmi_msg = get_bmi_message(bmi, bmi_category)
-
-    bmi_color(bmi_msg)
+    # Correct order for model
     ordered_cols = [
         'Gender', 'Age', 'Height', 'Weight',
         'SMOKE', 'alcohol_consump', 'Fried_Food_Consump',
@@ -82,8 +77,12 @@ if submitted:
         'water_consumption', 'calorie_monitoring', 'physical_activity',
         'time_spend_on_tech', 'MTRANS', 'family_history_with_overweight'
     ]
-    model_input = input_df[ordered_cols]
-    prediction = model.predict(model_input)[0]
+
+    # Create DataFrame & enforce correct order
+    input_df = pd.DataFrame([data])[ordered_cols]
+
+    # Predict
+    prediction = model.predict(input_df)[0]
     st.markdown(f"### 🧪 Obesity Risk Prediction: `{prediction}`")
 
     insert_to_sql(input_df.drop(columns=['Height_ft', 'Height_in']))

@@ -39,6 +39,7 @@ Generate:
 - 10 to 13 highly personalized tips
 - 5 general healthy behavioral tips
 Respond only in this language: LANG_PLACEHOLDER.
+But Always start with a warm greeting and a small talk like ohh theats impressive if person is healthy and in another case you can motivate them and tell them the advantages of being healthy
 """
 
 # --- Configurations ---

@@ -43,6 +43,7 @@ Respond only in this language: LANG_PLACEHOLDER.
 
 # --- Configurations ---
 st.set_page_config(page_title="BodyScope | Your AI Health Companion")
+st.markdown("**Answer A Few Questions And Get A Fully Personalised Suggestions**")
 st.title("💪 BodyScope: Your AI Health Companion")
 st.markdown("""
 ### Powered by Gemini 2.0 Flash | An Aviral Meharishi creation
@@ -61,6 +62,7 @@ language_map = {
     "English": "English",
     "Hindi": "Hindi",
     "Hinglish": "Hinglish",
+    "Gujrati" : "Gujrati"
     
 }
 selected_lang = st.selectbox("Select Language for Advice", list(language_map.keys()))

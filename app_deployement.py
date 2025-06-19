@@ -25,13 +25,13 @@ User Profile:
 - Family history of overweight: {user_data['family_history_with_overweight']}
 - Smoker: {user_data['SMOKE']}
 - Alcohol Consumption: {user_data['alcohol_consump']}
-- Fried Food Consumption: {user_data['Fried_Food_Consump']}
-- Vegetable Intake: {user_data['Freq_of_Vegie_Consump']} days/week
+- Fried Food Consumption more than thrice a week : {user_data['Fried_Food_Consump']}
+- Vegetable Intake Rating Out of 3: {user_data['Freq_of_Vegie_Consump']}
 - Meals per day: {user_data['no_of_meals']}
 - Snacking Frequency: {user_data['snacking_freq']}
 - Water Intake: {user_data['water_consumption']} liters
 - Calorie Monitoring: {user_data['calorie_monitoring']}
-- Physical Activity: {user_data['physical_activity']} hrs/week
+- Physical Activity Rating out of 5: {user_data['physical_activity']}
 - Technology Usage: {user_data['time_spend_on_tech']}
 - Transport Mode: {user_data['MTRANS']}
 
@@ -47,7 +47,7 @@ st.set_page_config(page_title="BodyScope | Your AI Health Companion")
 st.markdown("**Answer A Few Questions And Get A Fully Personalised Suggestions**")
 st.title("💪 BodyScope: Your AI Health Companion")
 st.markdown("""
-### Powered by Gemini 2.0 Flash | An Aviral Meharishi creation
+| Powered by Gemini 2.0 Flash |
 ---
 """)
 
@@ -76,13 +76,13 @@ height_in = st.number_input("Height (inches)", 0, 11)
 weight = st.number_input("Weight (kg)", min_value=1.0, max_value=300.0, step=0.1, format="%.1f")
 smoke = st.selectbox("Do you smoke?", ["yes", "no"])
 alcohol = st.selectbox("Alcohol Consumption", ["no", "Sometimes", "Frequently", "Always"])
-fried = st.selectbox("Do you eat fried food?", ["yes", "no"])
-vegies = st.selectbox("Freq. of Veggie Consumption (per week)", [0,1,2,3,4,5,6,7])
+fried = st.selectbox("Do you eat fried food more than twice a week?", ["yes", "no"])
+vegies = st.selectbox("Rate Your Freq. of Veggie Consumption", [0,1,2,3])
 meals = st.slider("No. of Meals Per Day", 1, 4, 3)
 snack = st.selectbox("Snacking Frequency", ["Nope", "Sometimes", "Frequently", "Always"])
 water = st.slider("Water Intake (liters/day)", 0, 4, 1)
 calories = st.selectbox("Do you monitor calorie intake?", ["yes", "no"])
-activity = st.slider("Physical Activity (hrs/week)", 0, 15, 2)
+activity = st.slider("Rate Your Physical Activity on the Scale of 5 Physical Activity, 0, 5, 2)
 technology = st.selectbox("Technology Usage", ["Low Usage", "Moderate Usage", "High Usage"])
 transport = st.selectbox("Mode of Transport", ["Walking", "Bike", "Public Transportation", "Automobile"])
 family_history = st.selectbox("Family history with overweight?", ["yes", "no"])

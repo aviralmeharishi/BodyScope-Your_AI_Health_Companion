@@ -11,9 +11,32 @@ from bmi_utils import (
     calculate_bmi,
     get_bmi_category,
     get_bmi_color,
-    get_bmi_message,
-    generate_prompt
+    get_bmi_message
 )
+
+# --- Prompt Generation ---
+def generate_prompt(user_data):
+    return f"""
+User Profile:
+- Gender: {user_data['Gender']}
+- Age: {user_data['Age']} years
+- Height: {user_data['Height']} meters
+- Weight: {user_data['Weight']} kg
+- Family history of overweight: {user_data['family_history_with_overweight']}
+- Smoker: {user_data['SMOKE']}
+- Alcohol Consumption: {user_data['alcohol_consump']}
+- Fried Food Consumption: {user_data['Fried_Food_Consump']}
+- Vegetable Intake: {user_data['Freq_of_Vegie_Consump']} days/week
+- Meals per day: {user_data['no_of_meals']}
+- Snacking Frequency: {user_data['snacking_freq']}
+- Water Intake: {user_data['water_consumption']} liters
+- Calorie Monitoring: {user_data['calorie_monitoring']}
+- Physical Activity: {user_data['physical_activity']} hrs/week
+- Technology Usage: {user_data['time_spend_on_tech']}
+- Transport Mode: {user_data['MTRANS']}
+
+Based on the above profile, provide personalized lifestyle and diet suggestions to reduce obesity risk. Mention risks and prevention strategies.
+"""
 
 # --- Configurations ---
 st.set_page_config(page_title="BodyScope | Your AI Health Companion")

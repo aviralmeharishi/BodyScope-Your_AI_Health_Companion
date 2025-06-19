@@ -60,7 +60,8 @@ genai.configure(api_key=GOOGLE_API_KEY)
 language_map = {
     "English": "English",
     "Hindi": "Hindi",
-    "Hinglish": "Hinglish"
+    "Hinglish": "Hinglish",
+    
 }
 selected_lang = st.selectbox("Select Language for Advice", list(language_map.keys()))
 
@@ -153,7 +154,7 @@ if submitted:
         prompt = generate_prompt(raw_data).replace("LANG_PLACEHOLDER", language_map[selected_lang])
         model = genai.GenerativeModel("models/gemini-1.5-flash-latest")
         response = model.generate_content(prompt)
-        suggestions = response.text.strip().split("\n")
+        suggestions = [line for line in response.text.strip().split("\n") if line.strip() != ""]
 
     st.markdown("#### 🗣️ Dr. Gemi's Advice")
     for tip in suggestions:

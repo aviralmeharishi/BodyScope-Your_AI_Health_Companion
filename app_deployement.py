@@ -35,7 +35,10 @@ User Profile:
 - Technology Usage: {user_data['time_spend_on_tech']}
 - Transport Mode: {user_data['MTRANS']}
 
-Based on the above profile, provide personalized lifestyle and diet suggestions to reduce obesity risk. Mention risks and prevention strategies.
+Generate:
+- 10 to 13 highly personalized tips
+- 5 general healthy behavioral tips
+Respond only in this language: LANG_PLACEHOLDER.
 """
 
 # --- Configurations ---
@@ -53,34 +56,34 @@ model = load_model("final_model.pkl")
 GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY", "")
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- User Inputs ---
-with st.form("user_data_form"):
-    col1, col2, col3 = st.columns(3)
+# --- Language Selector ---
+language_map = {
+    "English": "English",
+    "Hindi": "Hindi",
+    "Hinglish": "Hinglish"
+}
+selected_lang = st.selectbox("Select Language for Advice", list(language_map.keys()))
 
-    with col1:
-        gender = st.selectbox("Gender", ["Male", "Female"])
-        age = st.number_input("Age (in years)", 1, 120)
-        height_ft = st.number_input("Height (ft)", 1, 8)
-        height_in = st.number_input("Height (inches)", 0, 11)
-        weight = st.number_input("Weight (kg)", 20, 300)
+# --- User Inputs (Unified Layout) ---
+gender = st.selectbox("Gender", ["Male", "Female"])
+age = st.number_input("Age (in years)", 1, 120)
+height_ft = st.number_input("Height (ft)", 1, 8)
+height_in = st.number_input("Height (inches)", 0, 11)
+weight = st.number_input("Weight (kg)", 20, 300)
+smoke = st.selectbox("Do you smoke?", ["yes", "no"])
+alcohol = st.selectbox("Alcohol Consumption", ["no", "Sometimes", "Frequently", "Always"])
+fried = st.selectbox("Do you eat fried food?", ["yes", "no"])
+vegies = st.selectbox("Freq. of Veggie Consumption (per week)", [0,1,2,3,4,5,6,7])
+meals = st.slider("No. of Meals Per Day", 1, 7, 3)
+snack = st.selectbox("Snacking Frequency", ["Nope", "Sometimes", "Frequently", "Always"])
+water = st.slider("Water Intake (liters/day)", 0, 10, 3)
+calories = st.selectbox("Do you monitor calorie intake?", ["yes", "no"])
+activity = st.slider("Physical Activity (hrs/week)", 0, 15, 2)
+technology = st.selectbox("Technology Usage", ["Low Usage", "Moderate Usage", "High Usage"])
+transport = st.selectbox("Mode of Transport", ["Walking", "Bike", "Public Transportation", "Automobile"])
+family_history = st.selectbox("Family history with overweight?", ["yes", "no"])
 
-    with col2:
-        smoke = st.selectbox("Do you smoke?", ["yes", "no"])
-        alcohol = st.selectbox("Alcohol Consumption", ["no", "Sometimes", "Frequently", "Always"])
-        fried = st.selectbox("Do you eat fried food?", ["yes", "no"])
-        vegies = st.selectbox("Freq. of Veggie Consumption (per week)", [0,1,2,3,4,5,6,7])
-        meals = st.slider("No. of Meals Per Day", 1, 7, 3)
-
-    with col3:
-        snack = st.selectbox("Snacking Frequency", ["Nope", "Sometimes", "Frequently", "Always"])
-        water = st.slider("Water Intake (liters/day)", 0, 10, 3)
-        calories = st.selectbox("Do you monitor calorie intake?", ["yes", "no"])
-        activity = st.slider("Physical Activity (hrs/week)", 0, 15, 2)
-        technology = st.selectbox("Technology Usage", ["Low Usage", "Moderate Usage", "High Usage"])
-        transport = st.selectbox("Mode of Transport", ["Walking", "Bike", "Public Transportation", "Automobile"])
-        family_history = st.selectbox("Family history with overweight?", ["yes", "no"])
-
-    submitted = st.form_submit_button("💬 Ask Dr. Gemi")
+submitted = st.button("💬 Ask Dr. Gemi")
 
 if submitted:
     raw_data = {
@@ -147,14 +150,14 @@ if submitted:
     insert_to_sql(pd.DataFrame([raw_data]).drop(columns=["Height_ft", "Height_in"]))
 
     with st.spinner("Generating personalized advice from Dr. Gemi (Gemini 2.0 Flash)..."):
-        full_prompt = generate_prompt(raw_data)
+        prompt = generate_prompt(raw_data).replace("LANG_PLACEHOLDER", language_map[selected_lang])
         model = genai.GenerativeModel("models/gemini-1.5-flash-latest")
-        response = model.generate_content(full_prompt + "\nPlease provide personalized suggestions in English, Hinglish and Hindi.")
-        suggestions = response.text.split("\n\n")
+        response = model.generate_content(prompt)
+        suggestions = response.text.strip().split("\n")
 
-    with st.expander("🗣️ Dr. Gemi's Advice - Multilingual"):
-        for part in suggestions:
-            st.write(part)
+    st.markdown("#### 🗣️ Dr. Gemi's Advice")
+    for tip in suggestions:
+        st.markdown(f"- {tip}")
 
     st.info("Disclaimer: This is an AI-powered tool. Please consult a certified medical professional before making any medical decisions.")
     st.markdown("---")

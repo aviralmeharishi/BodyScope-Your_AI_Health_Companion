@@ -13,43 +13,37 @@ model = load_model("final_model.pkl")
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 def generate_prompt(data):
-    prompt = (
+    return (
         f"The user is a {data['Gender']} aged {data['Age']} years, "
         f"weighs {data['Weight']} kg with a height of {data['Height']} meters (originally {data['Height_ft']}ft {data['Height_in']}in). "
-        f"They have {'a' if data['SMOKE'] == 'Yes' else 'no'} smoking habit, "
-        f"alcohol consumption is {data['CALC']}, vegetable intake is {data['FCVC']}x/day, meals/day is {data['NCP']}, "
-        f"water intake is {data['CH2O']}L, calorie tracking: {data['SCC']}, physical activity: {data['FAF']}, "
-        f"tech usage: {data['TUE']}, transport: {data['MTRANS']}, family history: {data['family_history_with_overweight']}, high calorie food: {data['FAVC']}."
+        f"Smoking habit: {data['SMOKE']}, Alcohol consumption: {data['alcohol_consump']}, "
+        f"Fried food: {data['Fried_Food_Consump']}, Veg intake: {data['Freq_of_Vegie_Consump']}x/day, Meals/day: {data['no_of_meals']}, "
+        f"Water intake: {data['Water_Intake']}L, Calorie monitoring: {data['calorie_monitoring']}, Activity: {data['Physical_Activity']}, "
+        f"Tech usage: {data['Technology_Use']}, Transport: {data['Mode_Transport']}, Family history: {data['family_history_with_overweight']}"
     )
-    return prompt
 
 st.set_page_config(page_title="BodyScope | AI Health Companion", layout="centered")
 st.title("🧠 BodyScope - Your Dual-AI Health Companion")
 
-with st.form("user_input_form"):
-    st.subheader("📋 Enter Your Health & Lifestyle Info")
-    col1, col2 = st.columns(2)
-    with col1:
-        gender = st.selectbox("Gender", ["Male", "Female"])
-        age = st.slider("Age", 10, 100, 25)
-        height_ft = st.slider("Height - Feet", 3, 8, 5)
-        height_in = st.slider("Height - Inches", 0, 11, 7)
-        weight = st.number_input("Weight (in kg)", 20.0, 200.0, 70.0)
-        smoke = st.selectbox("Do you smoke?", ["Yes", "No"])
-        calc = st.selectbox("Alcohol Consumption", ["no", "Sometimes", "Frequently", "Always"])
-        favc = st.selectbox("High Caloric Food Consumption?", ["yes", "no"])
-    with col2:
-        fcvc = st.slider("Vegetable consumption per day", 1, 3, 2)
-        ncp = st.slider("Meals per day", 1, 4, 3)
-        caec = st.selectbox("Snacking frequency", ["Nope", "Sometimes", "Frequently", "Always"])
-        ch2o = st.slider("Water intake (L/day)", 1, 3, 2)
-        scc = st.selectbox("Do you monitor calories?", ["yes", "no"])
-        faf = st.slider("Physical Activity Level", 0, 3, 1)
-        tue = st.selectbox("Technology usage", ["Low Usage", "Moderate Usage", "High Usage"])
-        mtrans = st.selectbox("Mode of Transport", ["Walking", "Bike", "Public Transportation", "Automobile"])
-        family_history = st.selectbox("Family history with overweight?", ["yes", "no"])
+st.subheader("📋 Enter Your Health & Lifestyle Info")
+gender = st.selectbox("Gender", ["Male", "Female"])
+age = st.slider("Age", 10, 100, 25)
+height_ft = st.slider("Height - Feet", 3, 8, 5)
+height_in = st.slider("Height - Inches", 0, 11, 7)
+weight = st.number_input("Weight (in kg)", 20.0, 200.0, 70.0)
+smoke = st.selectbox("Do you smoke?", ["yes", "no"])
+alcohol = st.selectbox("Alcohol Consumption", ["no", "Sometimes", "Frequently", "Always"])
+fried = st.selectbox("Fried Food Consumption?", ["yes", "no"])
+vegies = st.slider("Vegetable consumption per day", 1, 3, 2)
+meals = st.slider("Meals per day", 1, 4, 3)
+water = st.slider("Water intake (L/day)", 1, 3, 2)
+calories = st.selectbox("Do you monitor calories?", ["yes", "no"])
+activity = st.slider("Physical Activity Level", 0, 3, 1)
+technology = st.selectbox("Technology usage", ["Low Usage", "Moderate Usage", "High Usage"])
+transport = st.selectbox("Mode of Transport", ["Walking", "Bike", "Public Transportation", "Automobile"])
+family_history = st.selectbox("Family history with overweight?", ["yes", "no"])
 
-    submitted = st.form_submit_button("💬 Ask Dr. Gemi for Advice")
+submitted = st.button("💬 Ask Dr. Gemi for Advice")
 
 if submitted:
     data = {
@@ -60,16 +54,15 @@ if submitted:
         'Height': convert_height_to_meters(height_ft, height_in),
         'Weight': weight,
         'SMOKE': smoke,
-        'CALC': calc,
-        'FAVC': favc,
-        'FCVC': fcvc,
-        'NCP': ncp,
-        'CAEC': caec,
-        'CH2O': ch2o,
-        'SCC': scc,
-        'FAF': faf,
-        'TUE': tue,
-        'MTRANS': mtrans,
+        'alcohol_consump': alcohol,
+        'Fried_Food_Consump': fried,
+        'Freq_of_Vegie_Consump': vegies,
+        'no_of_meals': meals,
+        'Water_Intake': water,
+        'calorie_monitoring': calories,
+        'Physical_Activity': activity,
+        'Technology_Use': technology,
+        'Mode_Transport': transport,
         'family_history_with_overweight': family_history
     }
 
@@ -97,3 +90,7 @@ if submitted:
             st.write(part)
 
     st.info("Disclaimer: This is an AI-powered tool. Please consult a certified medical professional before making any medical decisions.")
+
+
+st.markdown("---")
+st.markdown("**An Aviral Meharishi creation**")

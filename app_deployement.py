@@ -69,7 +69,7 @@ selected_lang = st.selectbox("Select Language for Advice", list(language_map.key
 
 # --- User Inputs (Unified Layout) ---
 gender = st.selectbox("Gender", ["Male", "Female"])
-age = st.number_input("Age (in years)", 18, 120)
+age = st.number_input("Age (in years)", 1, 120,)
 height_ft = st.number_input("Height (ft)", 1, 8)
 height_in = st.number_input("Height (inches)", 0, 11)
 weight = st.number_input("Weight (kg)", min_value=1.0, max_value=300.0, step=0.1, format="%.1f")

@@ -155,7 +155,7 @@ if submitted:
 
     with st.spinner("Generating personalized advice from Dr. Gemi (Gemini 2.0 Flash)..."):
         prompt = generate_prompt(raw_data).replace("LANG_PLACEHOLDER", language_map[selected_lang])
-        model = genai.GenerativeModel("models/gemini-1.5-flash")
+        model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(prompt)
         suggestions = [line for line in response.text.strip().split("\n") if line.strip() != ""]
 
@@ -166,4 +166,5 @@ if submitted:
     st.info("Disclaimer: This is an AI-powered tool. Please consult a certified medical professional before making any medical decisions.")
     st.markdown("---")
     st.markdown("> © 2025 • An Aviral Meharishi Creation")
+
 
